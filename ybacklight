@@ -1,0 +1,11 @@
+#!/bin/bash
+backlight_dir="/sys/class/backlight/radeon_bl0"
+if [ $# -lt 1 ]
+then
+    cat "$backlight_dir/brightness"
+    exit
+fi
+if [ "$1" -le "255" ] && [ "$1" -ge "0" ]
+then
+	echo "$1" > /sys/class/backlight/radeon_bl0/brightness
+fi
