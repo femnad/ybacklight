@@ -1,11 +1,21 @@
 #!/bin/bash
 backlight_dir="/sys/class/backlight/radeon_bl0"
-if [ $# -lt 1 ]
+brightness_file="$backlight_dir/brightness"
+min_brightness=0
+max_brightness=$(cat "$backlight_dir/max_brightness")
+if [ $# -eq 0 ]
 then
-    cat "$backlight_dir/brightness"
+    cat "$brightness_file"
     exit
-fi
-if [ "$1" -le "255" ] && [ "$1" -ge "0" ]
-then
-	echo "$1" > /sys/class/backlight/radeon_bl0/brightness
+elif [ $# -eq 2 ] && [ "$1" = "-set" ]
+    then
+    if [ $2 -ge 0 ] && [ $2 -le $max_brightness ]
+    then
+        echo $2 | tee "$brightness_file"
+    else
+        echo "Invalid brightness value"
+    fi
+else
+    echo "Usage:
+    -set <value>"
 fi
