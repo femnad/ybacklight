@@ -3,19 +3,61 @@ backlight_dir="/sys/class/backlight/radeon_bl0"
 brightness_file="$backlight_dir/brightness"
 min_brightness=0
 max_brightness=$(cat "$backlight_dir/max_brightness")
-if [ $# -eq 0 ]
-then
-    cat "$brightness_file"
-    exit
-elif [ $# -eq 2 ] && [ "$1" = "-set" ]
+
+
+set_brightness() {
+    if [ $1 -ge $min_brightness ] && [ $1 -le $max_brightness ]
     then
-    if [ $2 -ge 0 ] && [ $2 -le $max_brightness ]
-    then
-        echo $2 | tee "$brightness_file"
+        echo $1 | tee "$brightness_file"
     else
         echo "Invalid brightness value"
     fi
-else
+}
+
+get_brightness() {
+    echo $(cat $brightness_file)
+}
+
+change_brightness() {
+    case $1 in
+        -inc)
+            op='+'
+            ;;
+        -dec)
+            op='-'
+            ;;
+    esac
+    before=$(get_brightness)
+    after=$(expr "$before" $op "$2")
+    set_brightness $after
+}
+
+
+print_usage() {
     echo "Usage:
-    -set <value>"
+    -set <value>
+    -inc <value>
+    -dec <value>"
+}
+
+
+if [ $# -eq 0 ]
+then
+    get_brightness
+    exit
+elif [ $# -eq 2 ]
+then
+    case $1 in
+        -set)
+           set_brightness $2
+            ;;
+        -inc|-dec)
+            change_brightness $1 $2
+            ;;
+        *)
+            print_usage
+            ;;
+    esac
+else
+    print_usage
 fi
