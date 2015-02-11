@@ -5,7 +5,7 @@ min_brightness=0
 max_brightness=$(cat "$backlight_dir/max_brightness")
 
 
-set_brightness() {
+set_raw_brightness() {
     if [ $1 -ge $min_brightness ] && [ $1 -le $max_brightness ]
     then
         echo $1 | tee "$brightness_file"
@@ -14,9 +14,30 @@ set_brightness() {
     fi
 }
 
-get_brightness() {
+set_brightness() {
+    new_brightness=$(get_percent $1 $max_brightness)
+    set_raw_brightness $new_brightness
+}
+
+calculate_percent() {
+    percent_f=$(echo "scale=2;$1 / $2 * 100" | bc)
+    echo $(echo "$percent_f / 1" | bc)
+}
+
+get_percent() {
+    percent_f=$(echo "scale=2;$1 * $2 / 100" | bc)
+    echo $(echo "$percent_f / 1" | bc)
+}
+
+get_raw_brightness() {
     echo $(cat $brightness_file)
 }
+
+get_brightness() {
+    raw_brightness=$(get_raw_brightness)
+    echo $(calculate_percent $raw_brightness $max_brightness)
+}
+
 
 change_brightness() {
     case $1 in
@@ -32,12 +53,12 @@ change_brightness() {
     set_brightness $after
 }
 
-
 print_usage() {
     echo "Usage:
     -set <value>
     -inc <value>
-    -dec <value>"
+    -dec <value>
+    -setr <value>"
 }
 
 
@@ -49,7 +70,10 @@ elif [ $# -eq 2 ]
 then
     case $1 in
         -set)
-           set_brightness $2
+            set_brightness $2
+            ;;
+        -setr)
+            set_raw_brightness $2
             ;;
         -inc|-dec)
             change_brightness $1 $2
