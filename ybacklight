@@ -14,6 +14,18 @@ set_raw_brightness() {
     fi
 }
 
+round() {
+    base_round=$(echo "$1 / 1" | bc)
+    diff=$(echo "($1 - $base_round) * 10" | bc)
+    diff_round=$(echo "$diff / 1" | bc)
+    if [ "$diff_round" -lt "5" ]
+    then
+        echo $base_round
+    else
+        echo $(echo "($1 + 1) / 1" | bc)
+    fi
+}
+
 set_brightness() {
     new_brightness=$(get_percent $1 $max_brightness)
     set_raw_brightness $new_brightness
@@ -21,12 +33,12 @@ set_brightness() {
 
 calculate_percent() {
     percent_f=$(echo "scale=2;$1 / $2 * 100" | bc)
-    echo $(echo "$percent_f / 1" | bc)
+    echo $(round $percent_f)
 }
 
 get_percent() {
     percent_f=$(echo "scale=2;$1 * $2 / 100" | bc)
-    echo $(echo "$percent_f / 1" | bc)
+    echo $(round $percent_f)
 }
 
 get_raw_brightness() {
