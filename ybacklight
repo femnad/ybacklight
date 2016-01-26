@@ -74,7 +74,9 @@ print_usage() {
     -set <value>
     -inc <value>
     -dec <value>
-    -setr <value>"
+    -get
+    -raw_set <value>
+    -raw_get"
 }
 
 
@@ -82,6 +84,18 @@ if [ $# -eq 0 ]
 then
     get_brightness
     exit
+elif [ $# -eq 1 ]; then
+    case $1 in
+    -get)
+        get_brightness
+        ;;
+    -raw_set)
+        get_raw_brightness
+        ;;
+    *)
+        print_usage
+        ;;
+    esac
 elif [ $# -eq 2 ]
 then
     case $1 in
@@ -93,6 +107,12 @@ then
             ;;
         -inc|-dec)
             change_brightness $1 $2
+            ;;
+         -get)
+            get_brightness
+            ;;
+        -raw_get)
+            get_brightness
             ;;
         *)
             print_usage
