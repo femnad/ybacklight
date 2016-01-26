@@ -1,14 +1,18 @@
 #!/bin/bash
-backlight_dir="/sys/class/backlight/radeon_bl0"
+backlight_dir=$(readlink -f "/sys/class/backlight/"$(ls /sys/class/backlight))
 brightness_file="$backlight_dir/brightness"
 min_brightness=0
 max_brightness=$(cat "$backlight_dir/max_brightness")
 
-
 set_raw_brightness() {
     if [ $1 -ge $min_brightness ] && [ $1 -le $max_brightness ]
     then
-        echo $1 | tee "$brightness_file"
+        sudo -n ls > /dev/null 2>&1
+        if [ "$?" -ne 0 ]; then
+            echo 'Passwordless sudo privileges are required'
+            exit
+        fi
+        sudo bash -c "echo $1 | tee $brightness_file"
     else
         echo "Invalid brightness value"
     fi
