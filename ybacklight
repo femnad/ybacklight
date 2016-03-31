@@ -8,7 +8,7 @@ set_raw_brightness() {
     if [ $1 -ge $min_brightness ] && [ $1 -le $max_brightness ]
     then
         sudo -n ls > /dev/null 2>&1
-        if [ "$?" -ne 0 ] || [ "$UID" -ne 0 ]; then
+        if [ "$?" -ne "0" ] && [ "$UID" -ne "0" ]; then
             echo 'Root user privilege or passwordless sudo permission is required'
             exit
         fi
